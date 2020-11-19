@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Posts on Moritz Lammerich</title>
+    <link>/post/</link>
+    <description>Recent content in Posts on Moritz Lammerich</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <lastBuildDate>Sun, 15 Nov 2020 13:13:50 +0000</lastBuildDate><atom:link href="/post/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Camlink (4k) Linux Test</title>
+      <link>/post/camlinklinux/</link>
+      <pubDate>Sun, 15 Nov 2020 13:13:50 +0000</pubDate>
+      
+      <guid>/post/camlinklinux/</guid>
+      <description>The Problem While the Elgato Camlink 4k works with Linux in principle, there are a few quirks to be aware of. While it works fine in OBS, other software (such as Discord and Microsoft Teams) struggles to use it, usually resulting in only showing a black screen in the webcam preview.
+The Solution To alleviate this, we will need 2 components: v4l2loopback and ffmpeg. v4l2loopback allows us create dummy devices that can then be used to show custom video content as a webcam.</description>
+    </item>
+    
+  </channel>
+</rss>

@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="">
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+
+    
+    
+    <title>Camlink (4k) Linux Test · Moritz Lammerich</title>
+
+    <meta name="HandheldFriendly" content="True" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    
+    <link rel="stylesheet" href="/style.main.min.5ea2f07be7e07e221a7112a3095b89d049b96c48b831f16f1015bf2d95d914e5.css" />
+
+</head>
+<body class=" post-template ">
+
+    <div class="site-wrapper">
+
+<header class="site-header"><div class="outer site-nav-main">
+    <div class="inner"><nav class="site-nav">
+    <div class="site-nav-left">
+        
+            <a class="site-nav-logo" href="/">Moritz Lammerich</a>
+        
+        
+        <div class="site-nav-content">
+            <ul class="nav" role="menu">
+                
+                <li class="nav-home" role="menuitem"><a href="/page/about/">About</a></li>
+                
+                <li class="nav-home" role="menuitem"><a href="/">Blog</a></li>
+                
+            </ul>
+        </div>
+        
+    </div>
+</nav>
+
+</div>
+</div></header>
+
+<main id="site-main" class="site-main outer">
+    <div class="inner">
+
+        <article class="post-full post  no-image ">
+
+            <header class="post-full-header">
+
+                
+
+                <h1 class="post-full-title">Camlink (4k) Linux Test</h1>
+
+                
+
+                <div class="post-full-byline">
+                    <section class="post-full-byline-content">
+
+                        <ul class="author-list">
+    <li class="author-list-item">
+        <div class="author-card">
+            <div class="author-profile-image"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><g fill="none" fill-rule="evenodd"><path d="M3.513 18.998C4.749 15.504 8.082 13 12 13s7.251 2.504 8.487 5.998C18.47 21.442 15.417 23 12 23s-6.47-1.558-8.487-4.002zM12 12c2.21 0 4-2.79 4-5s-1.79-4-4-4-4 1.79-4 4 1.79 5 4 5z" fill="#FFF"/></g></svg></div>
+            <div class="author-info">
+                <div class="author-info">
+                    <h2>Moritz Lammerich</h2>
+                </div>
+            </div>
+        </div>
+        <a href="#" class="author-avatar author-profile-image"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><g fill="none" fill-rule="evenodd"><path d="M3.513 18.998C4.749 15.504 8.082 13 12 13s7.251 2.504 8.487 5.998C18.47 21.442 15.417 23 12 23s-6.47-1.558-8.487-4.002zM12 12c2.21 0 4-2.79 4-5s-1.79-4-4-4-4 1.79-4 4 1.79 5 4 5z" fill="#FFF"/></g></svg></a>
+    </li>
+</ul>
+
+                        <section class="post-full-byline-meta">
+                            
+                                <h4 class="author-name">Moritz Lammerich</h4>
+                            
+                            <div class="byline-meta-content">
+                                <time class="byline-meta-date" datetime="2020-111-11">15 November 2020</time>
+                                <span class="byline-reading-time"><span class="bull">&bull;</span> 3 min read</span>
+                            </div>
+                        </section>
+
+                    </section>
+
+
+                </div>
+            </header>
+
+            
+
+            <section class="post-full-content">
+                <div class="post-content">
+                    <h2 id="the-problem">The Problem</h2>
+<p>While the <a href="https://www.elgato.com/en/gaming/cam-link-4k">Elgato Camlink 4k</a> works with Linux in principle, there are a few quirks to be aware of.
+While it works fine in <a href="https://obsproject.com/">OBS</a>, other software (such as <a href="https://discord.com/">Discord</a> and <a href="https://www.microsoft.com/en-us/microsoft-365/microsoft-teams/download-app">Microsoft Teams</a>) struggles to use it, usually resulting in only showing a black screen in the webcam preview.</p>
+<h2 id="the-solution">The Solution</h2>
+<p>To alleviate this, we will need 2 components:
+<a href="https://github.com/umlaeute/v4l2loopback">v4l2loopback</a> and <a href="https://ffmpeg.org">ffmpeg</a>.
+v4l2loopback allows us create dummy devices that can then be used to show custom video content as a webcam.
+ffmpeg an incredibly versatile tool to &ldquo;record, convert and stream audio and video&rdquo;.
+So the plan is the following:</p>
+<ul>
+<li>read camlink video stream using ffmpeg</li>
+<li>do any necessary conversions (e.g. resolution or pixel  format)</li>
+<li>output converted video stream to v4l2loopback device</li>
+</ul>
+<h3 id="installation">Installation</h3>
+<p>On Arch Linux, ffmpeg can be installed by installing the <code>ffmpeg</code> package, while v4l2loopback is available in the <a href="https://aur.archlinux.org">AUR</a> in the form of <code>v4l2loopback-dkms</code>.
+For other distributions check their respective repositories, or build it from source following the guides provided by both tools.</p>
+<h3 id="usage">Usage</h3>
+<p>First, plug in the camera into the camlink and the camlink into a free USB3 port.</p>
+<p>Next, we need to load the v4l2loopback kernel module.
+By default, loading the module will create a single loopback device.</p>
+<pre><code>modprobe v4l2loopback
+</code></pre><p>This should have yielded 3 video devices:</p>
+<ul>
+<li>video0: camlink</li>
+<li>video1: camlink (webcams and webcam-like devices seem to create 2 video devices per hardware device)</li>
+<li>video2: loopback device</li>
+</ul>
+<p>Now we can use ffmpeg to send the video from the camlink to the loopback device:</p>
+<pre><code>ffmpeg -pix_fmt yuyv422 -i /dev/video0 -f v4l2 -s 1280x720 -vcodec rawvideo /dev/video2
+</code></pre><p>The trick is to explicitly request the pixel format to be yuyv422, which is what the camlink supports natively (the others are emulated as far as I can tell).</p>
+<table>
+<thead>
+<tr>
+<th>Option</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>-pix_fmt yuyv422</td>
+<td>set the input pixel format to <a href="https://wiki.videolan.org/YUV/">yuyv422</a></td>
+</tr>
+<tr>
+<td>-i /dev/video0</td>
+<td>use <code>/dev/video0</code> as input, this is the camlink</td>
+</tr>
+<tr>
+<td>-f v4l2</td>
+<td>set (output) format to video 4 linux 2</td>
+</tr>
+<tr>
+<td>-s 1280x720</td>
+<td>scale output to 720p, set this according to your needs*</td>
+</tr>
+<tr>
+<td>-vcodec rawvideo</td>
+<td>set output video codec to raw video</td>
+</tr>
+<tr>
+<td>/dev/video2</td>
+<td>output to <code>/dev/video2</code>, i.e. the loopback device</td>
+</tr>
+</tbody>
+</table>
+<p>* <strong>Note</strong>: Microsoft Teams seems to only support 720p on linux. Setting the resolution to 1080p (i.e. <code>-s 1920x1080</code>) will result in teams not seeing the dummy cam properly.</p>
+<p>Now the loopback device should show up as a webcam in your software&rsquo;s video/webcam settings showing the image from the camlink.</p>
+<h2 id="troubleshooting--useful-commands">Troubleshooting / Useful Commands</h2>
+<table>
+<thead>
+<tr>
+<th>Command</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>v4l2-ctl &ndash;list-devices</td>
+<td>list all available video devices</td>
+</tr>
+<tr>
+<td>v4l2-ctl -dX &ndash;get-fmt-video</td>
+<td>print video format info for device <code>/dev/videoX</code> (e.g. <code>-d2</code> for /dev/video2)</td>
+</tr>
+</tbody>
+</table>
+
+                </div>
+            </section>
+
+        </article>
+
+    </div>
+</main>
+<aside class="read-next outer">
+    <div class="inner">
+        <div class="read-next-feed">
+
+            
+        </div>
+    </div>
+</aside>
+
+
+        <footer class="site-footer outer">
+            <div class="site-footer-content inner">
+                <section class="copyright"><a href="/">Moritz Lammerich</a> &copy; 2020</section>
+                <nav class="site-footer-nav">
+                    <a href="/">Latest Posts</a>
+                    
+                    
+                    <a href="https://github.com/zechenturm" target="_blank" rel="noopener">Github</a>
+                    <a href="https://jonathanjanssens.com" target="_blank" rel="noopener" style="opacity: 0.5;">Hugo Casper3 by Jonathan Janssens</a>
+                </nav>
+            </div>
+        </footer>
+
+    </div>
+
+</body>
+</html>
